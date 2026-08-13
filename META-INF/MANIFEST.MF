@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Specification-Title: sprfix
+Specification-Vendor: _White_Mo, OtherNameHere
+Specification-Version: 1
+Implementation-Title: sound-physics-fix
+Implementation-Version: 1.0.0
+Implementation-Vendor: _White_Mo, OtherNameHere
+Implementation-Timestamp: 2026-08-12T23:55:23+0800
+MixinConfigs: sprfix.mixins.json
+

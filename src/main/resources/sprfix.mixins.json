@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.github.whitemo.sprfix.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "sprfix.refmap.json",
+  "client": [
+    "AbstractSoundInstanceMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": []
+}

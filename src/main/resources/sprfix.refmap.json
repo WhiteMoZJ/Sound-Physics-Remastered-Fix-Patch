@@ -1,0 +1,7 @@
+{
+  "mappings": {
+    "com.github.whitemo.sprfix.mixin.AbstractSoundInstanceMixin": {
+      "addPlayerSoundHeightOffset": "Lnet/minecraft/client/resources/sounds/AbstractSoundInstance;m_7780_()D"
+    }
+  }
+}
