@@ -14,7 +14,7 @@ public class SprFixConfig {
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> EXCLUDED_SOUND_PATTERNS;
 
     private static final List<String> DEFAULT_EXCLUDED = List.of(
-        "step", "walk", "land", "swim", "splash", "fly"
+        "step", "walk", "land", "swim", "splash", "fly", "pf"
     );
 
     static {
