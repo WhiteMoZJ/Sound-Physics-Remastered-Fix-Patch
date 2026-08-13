@@ -10,8 +10,8 @@ public class SprFixMod {
     public static final String MOD_ID = "sprfix";
 
     public SprFixMod() {
-        // 仅客户端生效，声音逻辑全在客户端
         if (FMLEnvironment.dist == Dist.CLIENT) {
+            SprFixConfig.register();
             MinecraftForge.EVENT_BUS.register(this);
         }
     }
