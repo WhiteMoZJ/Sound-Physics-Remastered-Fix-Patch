@@ -1,11 +1,12 @@
 package com.github.whitemo.sprfix.mixin;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.AbstractSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,10 +17,6 @@ import java.util.Set;
 @Mixin(AbstractSoundInstance.class)
 public abstract class AbstractSoundInstanceMixin {
 
-    // 玩家发声高度偏移：原版玩家站立眼高约1.62格，对应嘴部位置
-    private static final double HEIGHT_OFFSET = 1.62D;
-
-    // 脚步声、落地声、游泳声等移动音效应保留在脚部位置，不进行偏移
     private static final Set<String> EXCLUDED_SOUND_PATTERNS = Set.of(
         "step", "walk", "land", "swim", "splash", "fly"
     );
@@ -32,17 +29,6 @@ public abstract class AbstractSoundInstanceMixin {
             return;
         }
 
-        // 仅处理本地玩家的声音，远程玩家的声音已由服务端 EntityMixin 修正
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null) {
-            return;
-        }
-        double dx = self.getX() - player.getX();
-        double dz = self.getZ() - player.getZ();
-        if (dx * dx + dz * dz > 0.25D) {
-            return; // 声音位置与本地玩家不符，跳过
-        }
-
         String soundPath = self.getLocation().getPath();
         for (String pattern : EXCLUDED_SOUND_PATTERNS) {
             if (soundPath.contains(pattern)) {
@@ -50,16 +36,26 @@ public abstract class AbstractSoundInstanceMixin {
             }
         }
 
-        // 趴下（爬行）时玩家头部贴近地面，无需进行高度偏移
-        if (player.getPose() == Pose.SWIMMING || player.getPose() == Pose.SITTING) {
+        LocalPlayer localPlayer = Minecraft.getInstance().player;
+        ClientLevel level = Minecraft.getInstance().level;
+        if (localPlayer == null || level == null) {
             return;
         }
+
         double originalY = cir.getReturnValue();
-        double newY = originalY + HEIGHT_OFFSET;
 
-        if (player.getPose() == Pose.CROUCHING) newY -= 0.5;
-        if (player.getPose() == Pose.SITTING) newY -= 1.0;
+        // 在玩家列表中查找距离声音位置最近的玩家，使用 originalY 避免递归
+        Player closest = null;
+        double bestDist = 2.0D;
+        for (Player player : level.players()) {
+            double dist = player.distanceToSqr(self.getX(), originalY, self.getZ());
+            if (dist < bestDist) {
+                bestDist = dist;
+                closest = player;
+            }
+        }
 
+        double newY = closest != null ? closest.getEyeY() : originalY + 1.62D;
         cir.setReturnValue(newY);
     }
 }
