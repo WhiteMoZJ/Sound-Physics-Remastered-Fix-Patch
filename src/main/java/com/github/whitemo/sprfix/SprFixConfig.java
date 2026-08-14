@@ -12,9 +12,13 @@ public class SprFixConfig {
 
     public static final ForgeConfigSpec.BooleanValue ENABLED;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> EXCLUDED_SOUND_PATTERNS;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> EXCLUDED_MOD_NAMESPACES;
 
-    private static final List<String> DEFAULT_EXCLUDED = List.of(
-        "step", "walk", "land", "swim", "splash", "fly", "pf"
+    private static final List<String> DEFAULT_EXCLUDED_SOUND_PATTERNS = List.of(
+        "step", "walk", "land", "swim", "splash", "fly"
+    );
+    private static final List<String> DEFAULT_EXCLUDED_MOD_NAMESPACES = List.of(
+        "warbornrenewed", "presencefootsteps"
     );
 
     static {
@@ -26,7 +30,10 @@ public class SprFixConfig {
             .define("enabled", true);
         EXCLUDED_SOUND_PATTERNS = builder
             .comment("Sound path patterns to exclude from height correction. These sounds will remain at feet level.")
-            .defineList("excluded_sound_patterns", DEFAULT_EXCLUDED, o -> o instanceof String);
+            .defineList("excluded_sound_patterns", DEFAULT_EXCLUDED_SOUND_PATTERNS, o -> o instanceof String);
+        EXCLUDED_MOD_NAMESPACES = builder
+            .comment("Mod namespaces to exclude from height correction. All sounds from these mods will be skipped. Example: [\"minecraft\"]")
+            .defineList("excluded_mod_namespaces", DEFAULT_EXCLUDED_MOD_NAMESPACES, o -> o instanceof String);
         builder.pop();
         CLIENT_SPEC = builder.build();
     }

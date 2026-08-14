@@ -29,6 +29,13 @@ public abstract class AbstractSoundInstanceMixin {
             return;
         }
 
+        String namespace = self.getLocation().getNamespace();
+        for (String ns : SprFixConfig.EXCLUDED_MOD_NAMESPACES.get()) {
+            if (namespace.equals(ns)) {
+                return;
+            }
+        }
+
         String soundPath = self.getLocation().getPath();
         for (String pattern : SprFixConfig.EXCLUDED_SOUND_PATTERNS.get()) {
             if (soundPath.contains(pattern)) {
