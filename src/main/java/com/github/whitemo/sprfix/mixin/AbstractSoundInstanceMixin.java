@@ -17,51 +17,73 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(AbstractSoundInstance.class)
 public abstract class AbstractSoundInstanceMixin {
 
-    @Inject(method = "m_7780_", at = @At("RETURN"), cancellable = true, remap = false)
-    private void addPlayerSoundHeightOffset(CallbackInfoReturnable<Double> cir) {
+    @Inject(method = "m_7772_", at = @At("HEAD"), cancellable = true, remap = false)
+    private void fixSoundX(CallbackInfoReturnable<Double> cir) {
+        Player player = resolvePlayer();
+        if (player == null) return;
+        cir.setReturnValue(player.getX());
+    }
+
+    @Inject(method = "m_7780_", at = @At("HEAD"), cancellable = true, remap = false)
+    private void fixSoundY(CallbackInfoReturnable<Double> cir) {
+        Player player = resolvePlayer();
+        if (player == null) return;
+        cir.setReturnValue(player.getEyeY());
+    }
+
+    @Inject(method = "m_7778_", at = @At("HEAD"), cancellable = true, remap = false)
+    private void fixSoundZ(CallbackInfoReturnable<Double> cir) {
+        Player player = resolvePlayer();
+        if (player == null) return;
+        cir.setReturnValue(player.getZ());
+    }
+
+    private Player resolvePlayer() {
         if (!SprFixConfig.ENABLED.get()) {
-            return;
+            return null;
         }
 
         SoundInstance self = (SoundInstance) this;
 
         if (self.getSource() != SoundSource.PLAYERS) {
-            return;
+            return null;
         }
 
         String namespace = self.getLocation().getNamespace();
         for (String ns : SprFixConfig.EXCLUDED_MOD_NAMESPACES.get()) {
             if (namespace.equals(ns)) {
-                return;
+                return null;
             }
         }
 
         String soundPath = self.getLocation().getPath();
         for (String pattern : SprFixConfig.EXCLUDED_SOUND_PATTERNS.get()) {
             if (soundPath.contains(pattern)) {
-                return;
+                return null;
             }
         }
 
         LocalPlayer localPlayer = Minecraft.getInstance().player;
         ClientLevel level = Minecraft.getInstance().level;
         if (localPlayer == null || level == null) {
-            return;
+            return null;
         }
 
-        double originalY = cir.getReturnValue();
+        AbstractSoundInstanceAccessor acc = (AbstractSoundInstanceAccessor) this;
+        double rawX = acc.getRawX();
+        double rawY = acc.getRawY();
+        double rawZ = acc.getRawZ();
 
         Player closest = null;
         double bestDist = 2.0D;
         for (Player player : level.players()) {
-            double dist = player.distanceToSqr(self.getX(), originalY, self.getZ());
+            double dist = player.distanceToSqr(rawX, rawY, rawZ);
             if (dist < bestDist) {
                 bestDist = dist;
                 closest = player;
             }
         }
 
-        double newY = closest != null ? closest.getEyeY() : originalY + 1.62D;
-        cir.setReturnValue(newY);
+        return closest;
     }
 }
